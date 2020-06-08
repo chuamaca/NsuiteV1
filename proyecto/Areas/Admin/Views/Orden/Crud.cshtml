@@ -1,0 +1,1103 @@
+﻿@model  Orden 
+
+    
+@{
+    Model.Usuario usuario = new Model.Usuario().ObtenerPerfil(Helper.SessionHelper.GetUser());
+    ViewBag.Title = "Crud";
+    Model.DetalleOrden orden = new Model.DetalleOrden();
+    var seriedt = ViewBag.SerieDt;
+    var queestado = ViewBag.estado;
+
+}
+
+
+<script type="text/javascript">
+
+    $(function () {
+        $(".datepicker").datepicker({
+            defaultDate: "+1w",
+            beforeShowDay: $.datepicker.noWeekends,
+            dateFormat: "dd/mm/yy",
+            changeMonth: true,
+            numberOfMonths: 1
+        })
+    });
+
+    $(document).ready(function () {
+
+       
+        
+        var porId = document.getElementById("idorden").value
+
+        var miurl;
+
+        if (porId > 0) {
+
+            miurl = "../Search_Empresa/";
+
+        } else {
+             miurl = "../orden/Search_Empresa/";
+        }
+
+
+        $("#empresaorden").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    type: "POST",
+                    dataType: "JSON",
+                    url: miurl,
+
+                    data: { Prefix_empresa : request.term },
+                    success: function (data) {
+                        console.log(data)
+                        response($.map(data, function (item) {
+                            console.log(item);
+                            return {
+                                label: item.nmempresa,
+                                value: item.nmempresa,
+
+                            };
+                        }))
+                    }
+                })
+
+            }
+                ,
+            messages: {
+
+
+                noResults: "No results",
+                results: function (count) {
+                    return count + (count == 0 ? ' result' : ' results');
+                }
+
+
+
+            }
+        });
+
+
+       $("#empresaorden").on("blur", () => {
+            let empresa = document.querySelector("#empresaorden").value;
+          //  console.log(document.querySelector("#empresaorden").value)
+            $.ajax({
+                dataType: "json",
+                type: "GET",
+                contentType: "application/json; charset=utf-8",
+                url: '@Url.Content("~/admin/orden/buscartipohardware")' +"?empresa=" + empresa ,
+                data:'',
+                success: function (data) {
+                    // let dato = JSON.parse(data)
+                    $("#tipohardwaree").html("");
+                    $("#tipohardwaree").html("<option>tipo </option>");
+                    let opciones = "";
+                   
+                    data.forEach(element => opciones +="<option>" + element.nombre + "</option>")
+                    $("#tipohardwaree").html(opciones)
+                    //data.Foreach(element=>console.log(element))
+                   
+                    //console.log('datos traido '+dato)
+
+                }
+            })
+
+        })
+
+
+    })
+</script>
+
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        var porId = document.getElementById("idorden").value
+
+        var miurl;
+
+        if (porId > 0) {
+
+            miurl = "../Search_Cliente/";
+
+        } else {
+            miurl = "../orden/Search_Cliente/";
+        }
+
+        $("#clienteorden").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: miurl,
+
+                    type: "POST",
+                    dataType: "json",
+                    data: { Prefix: request.term },
+
+                    success: function (data) {
+                        response($.map(data, function (item) {
+                            return { label: item.nmcliente, value: item.nmcliente };
+                        }))
+                    }
+                })
+            },
+            messages: {
+                noResults: "No results",
+                results: function (count) {
+                    return count + (count == 0 ? ' result' : ' results');
+                }
+            }
+        });
+    })
+</script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        var porId = document.getElementById("idorden").value
+
+        var miurl;
+
+        if (porId > 0) {
+
+            miurl = "../Search_Sucursal/";
+
+        } else {
+            miurl = "../orden/Search_Sucursal/";
+        }
+
+        $("#sucursalorden").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: miurl,
+                    type: "POST",
+                    dataType: "json",
+                    data: { Prefix_sucursal: request.term },
+
+                    success: function (data) {
+                        response($.map(data, function (item) {
+                            return { label: item.nmsucursal, value: item.nmsucursal };
+                        }))
+                    }
+                })
+            },
+            messages: {
+                noResults: "No results",
+                results: function (count) {
+                    return count + (count == 0 ? ' result' : ' results');
+                }
+            }
+        });
+    })
+</script>
+
+
+
+<script>
+
+    $(function () {
+        var dateFormat = "",
+          from = $("#fsolicitudorden")
+            .datepicker({
+                defaultDate: "+1w",
+                beforeShowDay: $.datepicker.noWeekends,
+                dateFormat: "dd/mm/yy",
+                changeMonth: true,
+                numberOfMonths: 1
+            })
+            .on("change", function () {
+                to.datepicker("option", "minDate", getDate(this));
+            }),
+          to = $("#fentregaorden").datepicker({
+              defaultDate: "+1w",
+              beforeShowDay: $.datepicker.noWeekends,
+              dateFormat: "dd/mm/yy",
+              changeMonth: true,
+              numberOfMonths: 1
+          })
+          .on("change", function () {
+              from.datepicker("option", "maxDate", getDate(this));
+
+          });
+
+        function getDate(element) {
+            var date;
+            try {
+                date = $.datepicker.parseDate(dateFormat="dd/mm/yy", element.value);
+            } catch (error) {
+                date = null;
+            }
+
+            return date;
+        }
+
+        //$("#fsolicitud").on('change', function () {
+         
+        //    var date = Date.parse($(this).val());
+
+        //    if (date < Date.now().dateFormat("dd/mm/yy")) {
+        //        alert('Please select another date');
+        //        $(this).val('');
+        //    }
+
+        //});
+
+
+
+    });
+
+
+</script>
+
+<script>
+
+    $(function () {
+        var dateFormat = "",
+          from = $("#rentinginicio")
+            .datepicker({
+                defaultDate: "+1w",
+                beforeShowDay: $.datepicker.noWeekends,
+                dateFormat: "dd/mm/yy",
+                changeMonth: true,
+                numberOfMonths: 1
+            })
+            .on("change", function () {
+                to.datepicker("option", "minDate", getDate(this));
+            }),
+          to = $("#rentingfin").datepicker({
+              defaultDate: "+1w",
+              beforeShowDay: $.datepicker.noWeekends,
+              dateFormat: "dd/mm/yy",
+              changeMonth: true,
+              numberOfMonths: 1
+          })
+          .on("change", function () {
+              from.datepicker("option", "maxDate", getDate(this));
+
+          });
+
+        function getDate(element) {
+            var date;
+            try {
+                date = $.datepicker.parseDate(dateFormat="dd/mm/yy", element.value);
+            } catch (error) {
+                date = null;
+            }
+
+            return date;
+        }
+
+    });
+
+
+</script>
+
+@*<script>
+    window.onload = function () {
+        var fecha = new Date(); //Fecha actual
+        var mes = fecha.getMonth() + 1; //obteniendo mes
+        var dia = fecha.getDate(); //obteniendo dia
+        var ano = fecha.getFullYear(); //obteniendo año
+        if (dia < 10)
+            dia = '0' + dia; //agrega cero si el menor de 10
+        if (mes < 10)
+            mes = '0' + mes //agrega cero si el menor de 10
+
+        document.getElementById('fsolicitudorden').value = dia + "/" + mes + "/" + ano;
+        document.getElementById('fentregaorden').value = dia + 1 + "/" + mes + "/" + ano;
+    }
+</script>*@
+
+
+@*
+
+PARA CARGAR INVENTARIO EN UN VISTA PARCIAL
+
+*@
+<script>
+    $(document).ready(function () {
+
+
+
+
+
+
+        @if (Model.idorden > 0)
+        {
+            <text>
+                 CargarInventario();
+
+            </text>
+        }
+    })
+    function CargarInventario()
+    {
+        //traer precio hardware
+
+        let tipohardaware = $("#tipohardware").val();
+       
+        let empresa = $("#empresaorden").val();
+       
+        $("#inventario").load('@Url.Content("~/admin/orden/inventario?Orden_id=" + Model.idorden)' + "&tipo=" + tipohardaware.replace(/ /g, "-") + "&empresa=" + empresa.replace(/ /g, "-"));
+
+    }
+
+
+
+</script>
+
+
+
+
+
+
+
+
+@*<script>
+
+        $(document).ready(function () {
+
+            $("#empresaorden").change(function () {
+                consoloe.log('cambio')
+
+                $("#sucursalorden").empty();
+
+                $.getJSON('/orden/GetSucursal', { idempresa: $('#empresaorden').val() }, function (data) {
+                    $.each(data, function () {
+                        $('#sucursalorden').append('<option value=' +
+                            this.Value + '>' + this.Text + '</option>');
+                    });
+                });
+            });
+        });
+
+    </script>*@
+
+@*<script>
+        $(document).ready(function () {
+
+            $("#empresaorden").change(function () {
+
+                $("#clienteorden").empty();
+
+                $.getJSON('/orden/GetCliente', { idempresa: $('#empresaorden').val() }, function (data) {
+                    $.each(data, function () {
+                        $('#clienteorden').append('<option value=' +
+                            this.Value + '>' + this.Text + '</option>');
+                    });
+                });
+            });
+        });
+
+    </script>*@
+
+@*<script>
+    window.onload = function () {
+        var fecha = new Date(); //Fecha actual
+        var mes = fecha.getMonth() + 1; //obteniendo mes
+        var dia = fecha.getDate(); //obteniendo dia
+        var ano = fecha.getFullYear(); //obteniendo año
+        if (dia < 10)
+            dia = '0' + dia; //agrega cero si el menor de 10
+        if (mes < 10)
+            mes = '0' + mes //agrega cero si el menor de 10
+
+        document.getElementById('ftemision').value = dia + "/" + mes + "/" + ano;
+      
+    }
+</script>*@
+
+
+
+
+
+@using (Html.BeginForm("Guardar", "Orden", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="row">
+        <div class="col-sm-12 col-md-12">
+            <div class="well">
+                <div id="yo" class="page">
+
+
+
+                    <ul class="nav nav-tabs" role="tablist">
+                        <li role="presentation" class="active"><a href="#info" aria-controls="info" role="tab" data-toggle="tab">Informacion</a></li>
+                        <li role="presentation"><a href="#generarorden" aria-controls="social" role="tab" data-toggle="tab">Generar Orden</a></li>
+
+                        @if (Model.idorden > 0)
+                        {
+                            <li role="presentation"><a href="#inventario" aria-controls="inventario" role="tab" data-toggle="tab">Detalle Orden</a></li>
+                        }
+
+
+                    </ul>
+
+
+                    <div class="tab-content">
+
+                        <div role="tabpanel" class="tab-pane active" style="scrollbar-base-color:ButtonHighlight aliceblue;" id="info">
+
+                            <div class="form-horizontal">
+
+                                <fieldset>
+                                    <div class="form-group">
+
+                                        @Html.HiddenFor(x => x.idorden)
+                                        @Html.TextBoxFor(x => x.generateuserorden, htmlAttributes: new { @Value = usuario.nombre, @type = "hidden" })
+                                        @Html.TextBoxFor(x => x.generateempresaorden, htmlAttributes: new { @Value = usuario.razonsocial, @type = "hidden" })
+                                        @Html.HiddenFor(x => x.produccion)
+                                    </div>
+
+
+                                    <div class="form-group">
+                                        @Html.LabelFor(x => x.numeroorden, new { @class = "col-sm-2 control-label pull-left" })
+                                        <div class="col-md-2">
+                                            @Html.TextBoxFor(x => x.numeroorden, new { @class = "input-12", placeholder = "" })
+                                            @Html.ValidationMessageFor(x => x.numeroorden, null, new { @class = "label label-danger" })
+                                        </div>
+
+
+                                        @Html.LabelFor(x => x.motivorenting, new { @class = "col-sm-1 control-label pull-left" })
+                                        <div class="col-md-2">
+                                            @Html.TextBoxFor(x => x.motivorenting, new { @class = "input-12", placeholder = "ALQUILER" })
+                                            @Html.ValidationMessageFor(x => x.motivorenting, null, new { @class = "label label-danger" })
+                                        </div>
+
+                                        @Html.LabelFor(x => x.tipoatencionorden, new { @class = "col-sm-1 control-label pull-left" })
+                                        <div class="col-md-2">
+                                            @Html.TextBoxFor(x => x.tipoatencionorden, new { @class = "input-12" })
+                                            @Html.ValidationMessageFor(x => x.tipoatencionorden, null, new { @class = "label label-danger" })
+                                        </div>
+                                    </div>
+
+
+                                    <div class="form-group">
+                                        @Html.LabelFor(x => x.fsolicitudorden, new { @class = "col-sm-2 control-label pull-left" })
+                                        <div class="col-md-2">
+                                            @Html.TextBoxFor(x => x.fsolicitudorden, new { @class = "input-12 datepicker" })
+                                            @Html.ValidationMessageFor(x => x.fsolicitudorden, null, new { @class = "label label-danger" })
+                                        </div>
+
+
+
+                                        @Html.LabelFor(x => x.fentregaorden, new { @class = "col-sm-2 control-label pull-left" })
+                                        <div class="col-md-2">
+                                            @Html.TextBoxFor(x => x.fentregaorden, new { @class = "input-12 datepicker" })
+                                            @Html.ValidationMessageFor(x => x.fentregaorden, null, new { @class = "label label-danger" })
+                                        </div>
+                                    </div>
+
+
+
+
+                                    <hr />
+
+                                    <div class="form-group">
+
+                                        @Html.LabelFor(x => x.codigoorden, new { @class = "col-sm-2 control-label pull-left" })
+                                        <div class="col-md-2">
+                                            @Html.TextBoxFor(x => x.codigoorden, new { @class = "input-12", placeholder = "" })
+                                            @Html.ValidationMessageFor(x => x.codigoorden, null, new { @class = "label label-danger" })
+                                        </div>
+                                      
+
+                                            @Html.LabelFor(x => x.empresaorden, new { @class = "col-sm-1 control-label pull-left" })
+                                        <div class="col-md-3">
+                                          
+                                            @Html.EditorFor(x => x.empresaorden, new { htmlAttributes = new { @class = "input-12", placeholder = "Buscar Empresa" } })                                                                            
+                                                @Html.ValidationMessageFor(x => x.empresaorden, null, new { @class = "label label-danger"})
+                                        </div>
+
+                                      
+
+                                        @Html.LabelFor(x => x.sucursalorden, new { @class = "col-sm-1 control-label pull-left" })
+                                        <div class="col-md-2">
+                                         @Html.EditorFor(x => x.sucursalorden, new { htmlAttributes = new { @class = "input-12",  placeholder = "Buscar Sucursal" } })
+                                            @Html.ValidationMessageFor(x => x.sucursalorden, null, new { @class = "label label-danger" })
+                                        </div>
+
+                                    </div>
+
+
+
+
+                                    @*<div class="form-group">
+
+                                                               @Html.LabelFor(x => x.empresaorden, new { @class = "col-sm-2 control-label pull-left" })
+                                    <div class="col-md-3">
+                                        @Html.DropDownList("empresaorden",  ViewBag.miempresa as List<SelectListItem>, "-- Seleccionar Empresa --", new { @class = "input-12" })
+                                        @Html.ValidationMessageFor(x => x.empresaorden, null, new { @class = "label label-danger" })
+                                    </div>
+
+
+
+                                                               <div class="col-md-3">
+                                        @Html.DropDownList("sucursalorden", new SelectList(string.Empty, "Value", "Text"), new { @class = "input-12" })
+                                        @Html.ValidationMessageFor(x => x.sucursalorden, null, new { @class = "label label-danger" })
+                                    </div>
+
+                                    <div class="col-md-3">
+                                        @Html.DropDownList("clienteorden", new SelectList(string.Empty, "Value", "Text"), new { @class = "input-12" })
+                                        @Html.ValidationMessageFor(x => x.clienteorden, null, new { @class = "label label-danger" })
+                                    </div>
+
+                                    </div>*@
+
+
+                                    <div class="form-group">
+
+                                        @Html.LabelFor(x => x.clienteorden, new { @class = "col-sm-2 control-label pull-left" })
+                                        <div class="col-md-3">
+                                            @Html.EditorFor(x => x.clienteorden, new { htmlAttributes = new { @class = "input-12", placeholder = "Buscar Cliente" } })
+                                            @Html.ValidationMessageFor(x => x.clienteorden, null, new { @class = "label label-danger" })
+                                        </div>
+
+                                        @Html.LabelFor(x => x.contratointernoorden, new { @class = "col-sm-2 control-label pull-left" })
+                                        <div class="col-md-2">
+                                            @Html.EditorFor(x => x.contratointernoorden, new { htmlAttributes = new { @class = "input-12" } })
+                                            @Html.ValidationMessageFor(x => x.contratointernoorden, null, new { @class = "label label-danger" })
+                                        </div>
+                                    </div>
+
+
+
+
+
+                                    <div class="form-group">
+                                        @Html.LabelFor(x => x.refacturableorden, new { @class = "col-sm-2 control-label pull-left" })
+                                        <div class="col-md-3">
+                                            @Html.EditorFor(x => x.refacturableorden, new { htmlAttributes = new { @class = "input-12", placeholder = "SI REFACTURABLE/NO REFACTURABLE" } })
+                                            @Html.ValidationMessageFor(x => x.refacturableorden, null, new { @class = "label label-danger" })
+                                        </div>
+
+                                        <button type="button" class="btn btn-sm btn-info" data-toggle="modal" data-target="#exampleModal">
+                                            <span class="glyphicon glyphicon-list-alt"></span> Resposable de Cuenta
+                                        </button>
+                                       
+
+                                        <div id="my-modal" class="modal fade" tabindex="-1">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                                        <h3 class="smaller lighter blue no-margin">A modal with a slider in it!</h3>
+                                                    </div>
+
+                                                    <div class="modal-body">
+                                                        Some content
+                                                        <br />
+                                                        <br />
+                                                        <br />
+                                                        <br />
+                                                        <br />
+                                                        1
+                                                        <br />
+                                                        <br />
+                                                        <br />
+                                                        <br />
+                                                        <br />
+                                                        2
+                                                    </div>
+
+                                                    <div class="modal-footer">
+                                                        <button class="btn btn-sm btn-danger pull-right" data-dismiss="modal">
+                                                            <i class="ace-icon fa fa-times"></i>
+                                                            Close
+                                                        </button>
+                                                    </div>
+                                                </div><!-- /.modal-content -->
+                                            </div><!-- /.modal-dialog -->
+                                        </div>
+                                    </div>
+
+                               
+                                    <hr /> 
+
+
+
+                                    <div class="form-group">
+                                        @Html.LabelFor(x => x.hardwaredevice, new { @class = "col-sm-2 control-label pull-left" })
+                                        <div class="col-md-3">
+                                            @Html.TextBoxFor(x => x.hardwaredevice, new { @class = "input-12", placeholder = "" })
+                                            @Html.ValidationMessageFor(x => x.hardwaredevice, null, new { @class = "label label-danger" })
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        @Html.LabelFor(x => x.cantidadhardware, new { @class = "col-sm-2 control-label pull-left" })
+                                        <div class="col-md-3">
+                                            @Html.TextBoxFor(x => x.cantidadhardware, new { @class = "input-12", placeholder = "" })
+                                            @Html.ValidationMessageFor(x => x.cantidadhardware, null, new { @class = "label label-danger" })
+                                        </div>
+
+                                       
+                                  
+                                        @if (Model.idorden > 0)
+                                        {
+                                            @Html.LabelFor(x => x.tipohardware, new { @class = "col-sm-2 control-label pull-left" })
+                                            <div class="col-md-3">
+                                                @Html.TextBoxFor(x => x.tipohardware, new { @class = "input-12", placeholder = "" })
+                                                @*<select id="tipohardware" name="tipohardware"></select>*@
+                                                @Html.ValidationMessageFor(x => x.tipohardware, null, new { @class = "label label-danger" })
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            @Html.LabelFor(x => x.tipohardware, new { @class = "col-sm-2 control-label pull-left" })
+                                            <div class="col-md-3">
+                                                <select id="tipohardwaree" name="tipohardware">
+                                                    <option value="">Seleccione</option>
+                                                    @*<option value="tipo 1">1</option>
+                                                    <option value="tipo 2">2</option>
+                                                    <option value="tipo 3">3</option>
+                                                    <option value="tipo 4">4</option>*@
+                                                </select>
+                                                @Html.ValidationMessageFor(x => x.tipohardware, null, new { @class = "label label-danger" })
+                                            </div>
+                                        }
+
+                                      
+
+
+                                        @*@Html.LabelFor(x => x.tipohardware, new { @class = "col-sm-2 control-label pull-left" })
+                                        <div class="col-md-3">
+                                            @Html.TextBoxFor(x => x.tipohardware, new { @class = "input-12", placeholder = "" })
+                                            @Html.ValidationMessageFor(x => x.tipohardware, null, new { @class = "label label-danger" })
+                                        </div>*@
+                                    </div>
+
+                                    <div class="form-group">
+                                        @Html.LabelFor(x => x.sofwareorden, new { @class = "col-sm-2 control-label pull-left" })
+                                        <div class="col-md-3">
+                                            @Html.TextBoxFor(x => x.sofwareorden, new { @class = "input-12", placeholder = "" })
+                                            @Html.ValidationMessageFor(x => x.sofwareorden, null, new { @class = "label label-danger" })
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        @Html.LabelFor(x => x.Observacionesorden, new { @class = "col-sm-2 control-label pull-left" })
+                                        <div class="col-md-6">
+                                            @Html.TextAreaFor(x => x.Observacionesorden, new { @class = "input-12", placeholder = "" })
+                                            @Html.ValidationMessageFor(x => x.Observacionesorden, null, new { @class = "label label-danger" })
+                                        </div>
+                                    </div>
+
+                                </fieldset>
+                            </div>
+
+                        </div>
+
+
+
+                        <div role="tabpanel" class="tab-pane" style="scrollbar-base-color:ButtonHighlight aliceblue;" id="generarorden">
+
+
+                            <div class="form-horizontal">
+
+                                <fieldset>
+
+
+                                    <div class="form-group">
+                                        @Html.LabelFor(x => x.factura, new { @class = "col-sm-2 control-label pull-left" })
+                                        <div class="col-md-3">
+                                            @Html.TextBoxFor(x => x.factura, new { @class = "input-12", placeholder = "" })
+                                            @Html.ValidationMessageFor(x => x.factura, null, new { @class = "label label-danger" })
+                                        </div>
+                                       
+
+                                        @Html.LabelFor(x => x.ftemision, new { @class = "col-sm-2 control-label pull-left" })
+                                        <div class="col-md-2">
+                                            @Html.TextBoxFor(x => x.ftemision, new { @class = "input-12 datepicker" })
+                                            @Html.ValidationMessageFor(x => x.ftemision, null, new { @class = "label label-danger" })
+                                        </div>
+                                    </div>
+
+                                    <hr />
+
+
+                                    <div class="form-group">
+                                        @Html.LabelFor(x => x.rqservicio, new { @class = "col-sm-2 control-label pull-left" })
+                                        <div class="col-md-3">
+                                            @Html.TextBoxFor(x => x.rqservicio, new { @class = "input-12", placeholder = "" })
+                                            @Html.ValidationMessageFor(x => x.rqservicio, null, new { @class = "label label-danger" })
+                                        </div>
+
+                                        @Html.LabelFor(x => x.ordenservicio, new { @class = "col-sm-2 control-label pull-left" })
+                                        <div class="col-md-3">
+                                            @Html.TextBoxFor(x => x.ordenservicio, new { @class = "input-12", placeholder = "" })
+                                            @Html.ValidationMessageFor(x => x.ordenservicio, null, new { @class = "label label-danger" })
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        @Html.LabelFor(x => x.aprobadorrq, new { @class = "col-sm-2 control-label pull-left" })
+                                        <div class="col-md-3">
+                                            @Html.TextBoxFor(x => x.aprobadorrq, new { @class = "input-12", placeholder = "" })
+                                            @Html.ValidationMessageFor(x => x.aprobadorrq, null, new { @class = "label label-danger" })
+                                        </div>
+
+                                        @Html.LabelFor(x => x.correoaprobador, new { @class = "col-sm-2 control-label pull-left" })
+                                        <div class="col-md-3">
+                                            @Html.TextBoxFor(x => x.correoaprobador, new { @class = "input-12", placeholder = "" })
+                                            @Html.ValidationMessageFor(x => x.correoaprobador, null, new { @class = "label label-danger" })
+                                        </div>
+                                    </div>
+
+
+                                    <hr />
+
+                                    <div class="form-group">
+
+
+                                        @Html.LabelFor(x => x.contratomarco, new { @class = "col-sm-2 control-label pull-left" })
+                                        <div class="col-md-3">
+                                            @Html.TextBoxFor(x => x.contratomarco, new { @class = "input-12", placeholder = "" })
+                                            @Html.ValidationMessageFor(x => x.contratomarco, null, new { @class = "label label-danger" })
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        @Html.LabelFor(x => x.tipocliente, new { @class = "col-sm-2 control-label pull-left" })
+                                        <div class="col-md-3">
+                                            @Html.TextBoxFor(x => x.tipocliente, new { @class = "input-12", placeholder = "" })
+                                            @Html.ValidationMessageFor(x => x.tipocliente, null, new { @class = "label label-danger" })
+                                        </div>
+
+                                        @Html.LabelFor(x => x.grupoeconomico, new { @class = "col-sm-2 control-label pull-left" })
+                                        <div class="col-md-3">
+                                            @Html.TextBoxFor(x => x.grupoeconomico, new { @class = "input-12", placeholder = "" })
+                                            @Html.ValidationMessageFor(x => x.grupoeconomico, null, new { @class = "label label-danger" })
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        @Html.LabelFor(x => x.rentinginicio, new { @class = "col-sm-2 control-label pull-left" })
+                                        <div class="col-md-2">
+                                            @Html.TextBoxFor(x => x.rentinginicio, new { @class = "input-12 datepicker" })
+                                            @Html.ValidationMessageFor(x => x.rentinginicio, null, new { @class = "label label-danger" })
+                                        </div>
+
+                                        @Html.LabelFor(x => x.rentingfin, new { @class = "col-sm-2 control-label pull-left" })
+                                        <div class="col-md-2">
+                                            @Html.TextBoxFor(x => x.rentingfin, new { @class = "input-12 datepicker" })
+                                            @Html.ValidationMessageFor(x => x.rentingfin, null, new { @class = "label label-danger" })
+                                        </div>
+                                    </div>
+
+
+
+                                    <div class="form-group">
+                                        @Html.LabelFor(x => x.estadoorden, new { @class = "col-sm-2 control-label pull-left" })
+                                        <div class="col-md-3">
+                                            @Html.TextBoxFor(x => x.estadoorden, new { @class = "input-12" })
+                                            @Html.ValidationMessageFor(x => x.estadoorden, null, new { @class = "label label-danger" })
+                                        </div>
+
+
+
+
+
+
+                                        <div class="col-md-2">
+                                            <label>Adjunto</label>
+                                            <input type="file" name="adjuntorden" />
+                                        </div>
+                                    </div>
+
+
+
+
+                                </fieldset>
+                            </div>
+
+
+
+                        </div>
+
+                       @* 
+                        
+                        
+                        PARA VISUALIZAR EL DETALLEORDEN AGREGADO
+                        
+                         *@
+
+                        @if (Model.idorden > 0)                                              
+                        {
+                            <div role="tabpanel" class="tab-pane" style="scrollbar-base-color:ButtonHighlight cadetblue;" id="inventario">
+                                <div class="form-horizontal">
+                                    <fieldset>
+
+                                    </fieldset>
+                                </div>
+                            </div>
+                        }
+
+
+
+
+                        </div>
+
+                    </div>
+                <div class="text-right well well-sm">
+                    @if (Model.idorden>0)
+                    {
+                        <button class="btn btn-primary" type="button" data-toggle="modal" data-target="#modalEnviarCorreoFose"> Enviar Fose</button>
+
+                        <button class="btn btn-primary" type="button" data-toggle="modal" data-target="#modalEnviarCorreoGuiaRemision"> Enviar guia de Remision</button>
+
+                    }
+
+                   
+
+                    <button type="submit" data-ajax="true" class="btn btn-success">
+                        <span class="spinner-border spinner-border-sm mr-2"></span>
+                        Guardar
+                    </button>
+                </div>
+
+
+
+                    </div>
+
+                </div>
+    </div>
+
+
+    //PARA PODER VISUALIZAR EL MODAL DEL LA INFORMACION
+
+
+    <div id="cargando" class="modal fade" role="dialog">
+        <div class="modal-dialog modal-sm">
+
+            <!-- Modal content-->
+            <div class="modal-content">
+
+                <div class="modal-body" style="display:flex; justify-content:center;">
+                    <img style="width:120px; margin :5px auto;" src="https://d203ovh1oelywy.cloudfront.net/images/icons/load.gif" />
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Datos de la Ubcacion Final </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+                    <div class="form-group">
+                        @Html.LabelFor(x => x.responsableorden, new { @class = "col-sm-6 control-label pull-left" })
+                        @Html.TextBoxFor(x => x.responsableorden, new { @class = "form-control", placeholder = "" })
+                        @Html.ValidationMessageFor(x => x.responsableorden, null, new { @class = "label label-danger" })
+                    </div>
+
+
+                    <div class="form-group">
+                        @Html.LabelFor(x => x.telefonoresponsableorden, new { @class = "col-sm-6 control-label pull-left" })
+                        @Html.TextBoxFor(x => x.telefonoresponsableorden, new { @class = "input-12", placeholder = "" })
+                        @Html.ValidationMessageFor(x => x.telefonoresponsableorden, null, new { @class = "label label-danger" })
+                    </div>
+
+                    <div class="form-group-sm">
+                        @Html.LabelFor(x => x.tipousuarioorden, new { @class = "col-sm-4 control-label pull-left" })
+                        @Html.TextBoxFor(x => x.tipousuarioorden, new { @class = "input-12", placeholder = "PASS-INTERNO-OTRO" })
+                        @Html.ValidationMessageFor(x => x.tipousuarioorden, null, new { @class = "label label-danger" })
+                    </div>
+
+                    <div class="form-group-sm">
+                        @Html.LabelFor(x => x.equipousuarioorden, new { @class = "col-sm-4 control-label pull-left" })
+                        @Html.TextBoxFor(x => x.equipousuarioorden, new { @class = "input-12", placeholder = "" , id="usuario_ordem"})
+                        @Html.ValidationMessageFor(x => x.equipousuarioorden, null, new { @class = "label label-danger" })
+                    </div>
+
+                    <div class="form-group-sm">
+                        @Html.LabelFor(x => x.telefonousuarioorden, new { @class = "col-sm-4 control-label pull-left" })
+                        @Html.TextBoxFor(x => x.telefonousuarioorden, new { @class = "input-12", placeholder = "" })
+                        @Html.ValidationMessageFor(x => x.telefonousuarioorden, null, new { @class = "label label-danger" })
+                    </div>
+
+                    <div class="form-group-sm">
+                        @Html.LabelFor(x => x.redequipoorden, new { @class = "col-sm-4 control-label pull-left" })
+                        @Html.TextBoxFor(x => x.redequipoorden, new { @class = "input-12", placeholder = "" })
+                        @Html.ValidationMessageFor(x => x.redequipoorden, null, new { @class = "label label-danger" })
+                    </div>
+
+                    <div class="form-group-sm">
+                        @Html.LabelFor(x => x.ubicacionequipoorden, new { @class = "col-sm-4 control-label pull-left" })
+                        @Html.TextBoxFor(x => x.ubicacionequipoorden, new { @class = "input-12", placeholder = "" })
+                        @Html.ValidationMessageFor(x => x.ubicacionequipoorden, null, new { @class = "label label-danger" })
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-primary" data-dismiss="modal">Guardar</button>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal fade" id="modalEnviarCorreoFose" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <form action="/" method="post">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Datos de la Ubcacion Final </h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div>
+                            <input class="input-12" id="correoFrom" type="type" name="name" placeholder="Ingrese email" value="" />
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button id="enviarFoseCorreo" type="button" class="btn btn-sm btn-primary">Enviar</button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalEnviarCorreoGuiaRemision" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <form action="/" method="post">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Datos de la Ubcacion Final </h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div>
+                            <input class="input-12" id="correoFromGuiaRemision" type="type" name="name" placeholder="Ingrese email" value="" />
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button id="enviarGuiaRemisionCorreo" type="button" class="btn btn-sm btn-primary">Enviar</button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+}
+
+
+<script>
+
+    $('#enviarFoseCorreo').on('click', () => {
+        //  alert($('#correoFrom').val());
+        let clienteorden = $('#clienteorden').val();
+        console.log("clienteorden " + clienteorden);
+        let codigoorden = $('#codigoorden').val();
+        console.log("codigoorden " + codigoorden);
+        let correo = $('#correoFrom').val()
+        console.log("correo " + correo)
+        let numeroorden = $('#numeroorden').val();
+        console.log("numeroorden " + numeroorden)
+        var porId = document.getElementById("idorden").value
+        console.log("porId " + porId)
+
+
+       
+        $.ajax(
+          {
+              url:'@Url.Content("~/admin/orden/enviarCorreoFose")'+"?correo="+correo+"&id="+porId+"&codigoorden="+codigoorden+"&clienteorden="+clienteorden+"&numeroorden="+numeroorden,
+             // url: "http://localhost:54520/admin/orden/enviarCorreoFose?correo=" + correo + "&id=" + porId + "&codigoorden=" + codigoorden + "&clienteorden=" + clienteorden + "&numeroorden=" + numeroorden,
+              data: '',
+              dataType: "json",
+              type: "GET",
+              contentType: "application/json; charset=utf-8",
+              success: function (msg) {
+
+                  if (!msg.response) {
+                      title = "Ups"
+                      icon ="warning"
+                  } else {
+                      title = "Exito"
+                      icon ="success"
+                  }
+
+                      Swal.fire({
+                     title: title,
+                  text:  msg.message,
+                  icon: icon,
+                // +' showCancelButton: true,'
+                 confirmButtonColor:"#3085d6",
+              //   +' cancelButtonColor: "#d33",'
+                  confirmButtonText: "Ok"
+              }).then((result) => {
+
+              })
+
+              },
+              error: function (result) {
+                  alert("ERROR " + result.status + ' ' + result.statusText);
+              }
+          });
+          })
+</script>
+
+<script>
+    $('#enviarGuiaRemisionCorreo').on('click', () => {
+        //  alert($('#correoFrom').val());
+        let clienteorden = $('#clienteorden').val();
+        let codigoorden = $('#codigoorden').val();
+        let correo = $('#correoFromGuiaRemision').val()
+
+        var porId = document.getElementById("idorden").value
+
+     //   '@Url.Content("~/admin/orden/enviarCorreoFose")'
+        $.ajax(
+          {
+              url:'@Url.Content("~/admin/orden/enviarCorreoGuiaRemision")' +"?correo=" + correo + "&id=" + porId + "&codigoorden=" + codigoorden + "&clienteorden=" + clienteorden,
+              data: '',
+              dataType: "json",
+              type: "GET",
+              contentType: "application/json; charset=utf-8",
+              success: function (msg) {
+
+                  if (!msg.response) {
+                      title = "Ups"
+                      icon ="warning"
+                  } else {
+                      title = "Exito"
+                      icon ="success"
+                  }
+
+                      Swal.fire({
+                     title: title,
+                  text:  msg.message,
+                  icon: icon,
+                // +' showCancelButton: true,'
+                 confirmButtonColor:"#3085d6",
+              //   +' cancelButtonColor: "#d33",'
+                  confirmButtonText: "Ok"
+              }).then((result) => {
+                  if (result.value) {
+
+                  }
+              })
+
+              },
+              error: function (result) {
+                  alert("ERROR " + result.status + ' ' + result.statusText);
+              }
+          });
+    })
+</script>
